@@ -6,6 +6,9 @@ import subprocess
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("green")
 
+isDiscordOn = False
+
+
 
 class App(customtkinter.CTk):
     def __init__(self):
@@ -31,15 +34,15 @@ class App(customtkinter.CTk):
         )
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
         self.sidebar_button_1 = customtkinter.CTkButton(
-            self.sidebar_frame, command=self.sidebar_button_event
+            self.sidebar_frame, command=self.activate_bot
         )
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
         self.sidebar_button_2 = customtkinter.CTkButton(
-            self.sidebar_frame, command=self.sidebar_button_event
+            self.sidebar_frame, command=self.deactivate_bot
         )
         self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
         self.sidebar_button_3 = customtkinter.CTkButton(
-            self.sidebar_frame, command=self.sidebar_button_event
+            self.sidebar_frame
         )
         self.sidebar_button_3.grid(row=3, column=0, padx=20, pady=10)
 
@@ -68,25 +71,23 @@ class App(customtkinter.CTk):
 
         # set default values
         self.sidebar_button_1.configure(text="Turn On Discord Bot")
-        self.sidebar_button_2.configure(text="Turn On Raspberry Pi")
-        self.sidebar_button_3.configure(state="disabled", text="Disabled CTkButton")
+        self.sidebar_button_2.configure(text="Turn Off Discord Bot")
 
-    # check if turn on discord bot button was pressed
-    def sidebar_button_event(self):
-        clicked_button = self.sidebar_frame.get_clicked_button()
-        if clicked_button == self.sidebar_button_1:
-            self.sidebar_button_1.configure(text="Turn Off Discord Bot")
-            process = subprocess.Popen(
-                ["python", "discordbot.py"], stdout=subprocess.PIPE
-            )
-        elif clicked_button == self.sidebar_button_2:
+    def activate_bot(self):
+        global isDiscordOn
+        if not isDiscordOn:
+            process = subprocess.Popen(["python3", "main.py"])
+            isDiscordOn = True
+
+    
+    def deactivate_bot(self):
+        global isDiscordOn
+        if isDiscordOn:
+            self.sidebar_button_2.configure(text="Turn On Raspberry Pi")
+            isDiscordOn = False
+        else:
             self.sidebar_button_2.configure(text="Turn Off Raspberry Pi")
-            try:
-                process.kill()
-            except:
-                pass
-        elif clicked_button == self.sidebar_button_3:
-            self.sidebar_button_3.configure(text="Disabled CTkButton")
+            isDiscordOn = True
 
     def update_joystick_position(self, x, y):
         # Update progress bars

@@ -8,21 +8,14 @@ import lirc
 import RPi_I2C_driver
 import RPi.GPIO as GPIO
 import Adafruit_DHT
-import os
 import openai
 import ADC0834
-import tkinter
-import customtkinter
-
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 BtnPin = 22
 GPIO.setup(BtnPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 ADC0834.setup()
-
-customtkinter.set_appearance_mode("System")
-customtkinter.set_default_color_theme("green")
 
 sockid = lirc.init("main")
 mylcd = RPi_I2C_driver.lcd()
@@ -32,15 +25,12 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="-", intents=intents)
 bot.remove_command("help")
 
-
 async def setup_hook():
     await bot.load_extension("cogs.cog_function")
-
 
 bot.setup_hook = setup_hook
 
 user_api_keys = {}
-
 
 @bot.command()
 async def help(ctx):
@@ -64,7 +54,6 @@ async def help(ctx):
     embed.add_field(name="-usegpt", value="Uses GPT-3 to generate text", inline=False)
     await ctx.send(embed=embed)
 
-
 @bot.command()
 async def storekey(ctx, *, key):
     user_api_keys[ctx.message.author.id] = key
@@ -76,7 +65,6 @@ async def storekey(ctx, *, key):
         color=0xEEE657,
     )
     embed.add_field(name="Key", value=key, inline=False)
-
 
 @bot.command()
 async def usegpt(ctx, *, key):
@@ -113,7 +101,6 @@ async def usegpt(ctx, *, key):
     # delete the loading message
     await ctx.channel.history(limit=1).flatten()[0].delete()
     await ctx.send(embed=embed)
-
 
 @bot.command()
 async def display(ctx, *, text):
@@ -176,7 +163,6 @@ async def display(ctx, *, text):
         mylcd.lcd_display_string(text, 1)
         time.sleep(0.5)
 
-
 @bot.command()
 async def displayjoystick(ctx):
     mylcd.lcd_clear()
@@ -199,11 +185,9 @@ async def displayjoystick(ctx):
             mylcd.lcd_clear()
             break
 
-
 @bot.event
 async def on_ready():
     print("We have logged in as {0.user}".format(bot))
-
 
 @bot.event
 async def on_message(message):
@@ -271,6 +255,5 @@ async def on_message(message):
             return
 
     await bot.process_commands(message)
-
 
 bot.run("MTA4MzQ0OTY4MjU5Mzg0OTM0NA.G9cKXr.Gq8UfFAPqsm8L9Uf0ogPQFLM3F6ygv9p9u6yjw")
