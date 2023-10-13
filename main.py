@@ -190,7 +190,7 @@ async def displayjoystick(ctx):
         time.sleep(0.2)
         if Btn_val == False:
             mylcd.lcd_clear()
-            break
+            return
 
 
 @bot.event
