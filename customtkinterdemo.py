@@ -15,8 +15,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT
 import openai
 import ADC0834
-
-
+import main
 
 
 GPIO.setmode(GPIO.BCM)
@@ -33,7 +32,6 @@ isDiscordOn = False
 process = None
 
 isJoystickOn = False
-
 
 
 class App(customtkinter.CTk):
@@ -62,6 +60,7 @@ class App(customtkinter.CTk):
         self.sidebar_button_1 = customtkinter.CTkButton(
             self.sidebar_frame, command=self.activate_bot
         )
+
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
 
         # temperature and humidity frame side by side with button to get temperature and humidity
@@ -101,6 +100,12 @@ class App(customtkinter.CTk):
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
 
+        self.turn_off_joystick = customtkinter.CTkButton(
+            self.temperature_humidity_frame, command=self.turn_off_joystick
+        )
+
+
+
 
 
         # set default values
@@ -108,12 +113,14 @@ class App(customtkinter.CTk):
         self.temperature_textbox.configure(text="Temperature: 0°C")
         self.humidity_textbox.configure(text="Humidity: 0%")
         self.get_temperature_button.configure(text="Get Temperature and Humidity")
+        self.loading_textbox.configure(text=" ")
 
 
     def activate_bot(self):
         global isDiscordOn
         if not isDiscordOn:
             self.sidebar_button_1.configure(text="Turn Off Discord Bot")
+            global process
             process = subprocess.Popen(["python3", "main.py"])
             isDiscordOn = True
         else:
