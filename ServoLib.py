@@ -14,8 +14,8 @@ import ADC0834
 
 SERVO_MIN_PULSE = 500
 SERVO_MAX_PULSE = 2500
-ServoPin1 = 24
-ServoPin2 = 25
+ServoPin1 = 19
+ServoPin2 = 20
 
 
 def map(value, inMin, inMax, outMin, outMax):
@@ -57,15 +57,12 @@ def loop():
         x_val = ADC0834.getResult(0)  # added from the Joystick program
         y_val = ADC0834.getResult(1)  # added from the Joystick program
         setAngleX(x_val)
-        time.sleep(0.75)
         setAngleY(y_val)
-        time.sleep(0.75)
 
 
 def destroy():
     p.stop()
     p2.stop()
-    GPIO.cleanup()
 
 
 if __name__ == "__main__":  # Program start from here

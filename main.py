@@ -16,7 +16,6 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 BtnPin = 22
 GPIO.setup(BtnPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-ADC0834.setup()
 
 sockid = lirc.init("main")
 mylcd = RPi_I2C_driver.lcd()
@@ -181,31 +180,40 @@ async def joystick(ctx):
         color=0xEEE657,
     )
     await ctx.send(embed=embed)
+    global_variables.setup()
+    prev_x_val = 0
+    prev_y_val = 0
     while True:
         x_val = ADC0834.getResult(0)
         y_val = ADC0834.getResult(1)
+        button_val = GPIO.input(23)
 
-        Btn_val = GPIO.input(BtnPin)
+        global_variables.setAngleX(x_val)
+        global_variables.setAngleY(y_val)
 
-        try:
-            # use the joystick to control the 2 servo motors
-            if x_val > 200:
-                global_variables.setAngle1(180)
-            elif x_val < 50:
-                global_variables.setAngle1(0)
-            else:
-                global_variables.setAngle1(90)
+        lcd_text = "X: " + str(x_val)
+        lcd_text2 = "Y: " + str(y_val)
 
-            if y_val > 200:
-                global_variables.setAngle2(180)
-            elif y_val < 50:
-                global_variables.setAngle2(0)
-            else:
-                global_variables.setAngle2(90)
-        except KeyboardInterrupt:
+        if len(str(x_val)) < len(str(prev_x_val)):
+            mylcd.lcd_clear()
+        if len(str(y_val)) < len(str(prev_y_val)):
+            mylcd.lcd_clear()
+        
+        mylcd.lcd_display_string(lcd_text, 1)
+        mylcd.lcd_display_string(lcd_text2, 2)
+
+        prev_x_val = x_val
+        prev_y_val = y_val
+
+        global_variables.curr_x_val = x_val
+        global_variables.curr_y_val = y_val
+
+
+        if button_val == False:
+            mylcd.lcd_clear()
             global_variables.destroy()
             return
-
+        
 
 @bot.event
 async def on_ready():

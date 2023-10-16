@@ -15,6 +15,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT
 import openai
 import ADC0834
+import global_variables
 import main
 
 
@@ -100,10 +101,6 @@ class App(customtkinter.CTk):
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
 
-        self.turn_off_joystick = customtkinter.CTkButton(
-            self.temperature_humidity_frame, command=self.turn_off_joystick
-        )
-
 
 
 
@@ -140,12 +137,6 @@ class App(customtkinter.CTk):
         self.update_temperature(temperature)
         self.update_humidity(humidity)
     
-
-    
-
-    
-    
-
 
 
 if __name__ == "__main__":

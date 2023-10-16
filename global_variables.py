@@ -11,44 +11,18 @@ import Adafruit_DHT
 import openai
 import ADC0834
 
-SERVO_MIN_PULSE = 500
-SERVO_MAX_PULSE = 2500 
-
-ServoPin1 = 19
-ServoPin2 = 20
-
-def map(value, inMin, inMax, outMin, outMax):
-    return (outMax - outMin) * (value - inMin) / (inMax - inMin) + outMin
-
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-ADC0834.setup()
-global p
-global p2
-GPIO.setup(ServoPin1, GPIO.OUT)
-GPIO.setup(ServoPin2, GPIO.OUT)
-GPIO.output(ServoPin1, GPIO.LOW)
-GPIO.output(ServoPin2, GPIO.LOW)
-p = GPIO.PWM(ServoPin1, 50)
-p2 = GPIO.PWM(ServoPin2, 50)
-p.start(0)
-p2.start(0)
 
-joystick_x_value = 0
-joystick_y_value = 0
+SERVO_MIN_PULSE = 500
+SERVO_MAX_PULSE = 2500
+ServoPin1 = 19
+ServoPin2 = 20
 
-def setAngle1(angle):
-    angle = max(0, min(180, angle))
-    pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
-    pwm = map(pulse_width, 0, 20000, 0, 100)
-    p.ChangeDutyCycle(pwm)
+curr_x_val = 0
+curr_y_val = 0
 
-def setAngle2(angle):  
-    angle = max(0, min(180, angle))
-    pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
-    pwm = map(pulse_width, 0, 20000, 0, 100)
-    p2.ChangeDutyCycle(pwm)
 
 def get_temperature_and_humidity():
 
@@ -56,17 +30,50 @@ def get_temperature_and_humidity():
 
     return temperature, humidity
 
-def moveServo1(angle):
-    p.ChangeDutyCycle(2.5 + 10 * angle / 180)
-    time.sleep(0.02)
-    p.ChangeDutyCycle(0)   
 
-def moveServo2(angle):
-    p2.ChangeDutyCycle(2.5 + 10 * angle / 180)
-    time.sleep(0.02)
-    p2.ChangeDutyCycle(0)
+
+def map(value, inMin, inMax, outMin, outMax):
+    return (outMax - outMin) * (value - inMin) / (inMax - inMin) + outMin
+
+
+def setup():
+    global p
+    global p2
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)  # Numbers GPIOs by BCM
+    GPIO.setup(ServoPin1, GPIO.OUT)  # Set ServoPin's mode is output
+    GPIO.output(ServoPin1, GPIO.LOW)  # Set ServoPin to low
+    p = GPIO.PWM(ServoPin1, 50)  # set Frequecy to 50Hz
+    p.start(0)  # Duty Cycle = 0
+    GPIO.setup(ServoPin2, GPIO.OUT)  # Set ServoPin's mode is output
+    GPIO.output(ServoPin2, GPIO.LOW)  # Set ServoPin to low
+    p2 = GPIO.PWM(ServoPin2, 50)  # Set ServoPin to low
+    p2.start(0)
+    ADC0834.setup()  # added from the Joystick program
+
+
+def setAngleX(angle):  # make the servo rotate to specific angle (0-180 degrees)
+    angle = max(0, min(180, angle))
+    pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
+    pwm = map(pulse_width, 0, 20000, 0, 100)
+    p.ChangeDutyCycle(pwm)  # map the angle to duty cycle and output it
+
+
+def setAngleY(angle):  # make the servo rotate to specific angle (0-180 degrees)
+    angle = max(0, min(180, angle))
+    pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
+    pwm = map(pulse_width, 0, 20000, 0, 100)
+    p2.ChangeDutyCycle(pwm)  # map the angle to duty cycle and output it
+
+
+def loop():
+    while True:
+        x_val = ADC0834.getResult(0)  # added from the Joystick program
+        y_val = ADC0834.getResult(1)  # added from the Joystick program
+        setAngleX(x_val)
+        setAngleY(y_val)
+
 
 def destroy():
     p.stop()
     p2.stop()
-    GPIO.cleanup()
