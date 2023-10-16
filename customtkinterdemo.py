@@ -18,7 +18,6 @@ import ADC0834
 import global_variables
 import main
 
-
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 ADC0834.setup()
