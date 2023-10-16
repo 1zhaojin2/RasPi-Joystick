@@ -23,6 +23,8 @@ ServoPin2 = 20
 curr_x_val = 0
 curr_y_val = 0
 
+isMonitoring = False
+
 
 def get_temperature_and_humidity():
 
@@ -77,3 +79,7 @@ def loop():
 def destroy():
     p.stop()
     p2.stop()
+    isMonitoring = False
+
+def get_joystick_values():
+    return curr_x_val, curr_y_val
