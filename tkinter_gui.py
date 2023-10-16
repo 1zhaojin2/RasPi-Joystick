@@ -3,9 +3,8 @@ import subprocess
 import global_variables
 
 
-isDiscordOn = False
+is_discord_on = False
 process = None
-isJoystickOn = False
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("green")
@@ -119,17 +118,28 @@ class App(customtkinter.CTk):
 
     def activate_bot(self):
 
-        global isDiscordOn
+        global is_discord_on, process
 
-        if not isDiscordOn:
+        if not is_discord_on:
             self.sidebar_button_1.configure(text="Turn Off Discord Bot")
-            global process
+
+            try:
+                process.kill()
+            except NameError:
+                pass
+
             process = subprocess.Popen(["python3", "main.py"])
-            isDiscordOn = True
+            
+            is_discord_on = True
         else:
             self.sidebar_button_1.configure(text="Turn On Discord Bot")
-            process.kill()
-            isDiscordOn = False
+
+            try:
+                process.kill()
+            except NameError:
+                pass
+
+            is_discord_on = False
     
     def update_temperature(self, temperature):
 
@@ -154,9 +164,9 @@ class App(customtkinter.CTk):
 
     def start_monitoring(self):
 
-        global_variables.isMonitoring = not global_variables.isMonitoring
+        global_variables.is_monitoring = not global_variables.is_monitoring
 
-        if global_variables.isMonitoring:
+        if global_variables.is_monitoring:
             self.start_monitoring_button.configure(text="Stop Monitoring")
             self.start_monitoring_button.update()
             self.monitor_loop()
@@ -166,7 +176,7 @@ class App(customtkinter.CTk):
 
     def monitor_loop(self):
 
-        if not global_variables.isMonitoring:
+        if not global_variables.is_monitoring:
             self.start_monitoring_button.configure(text="Start Monitoring")
             self.start_monitoring_button.update()
             return

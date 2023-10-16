@@ -12,11 +12,11 @@ import openai
 import ADC0834
 import global_variables
 
-BtnPin = 22
+button_pin = 22
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(BtnPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 sockid = lirc.init("main")
 mylcd = RPi_I2C_driver.lcd()
@@ -139,44 +139,44 @@ async def display(ctx, *, text):
     await ctx.send(embed=embed)
 
     if len(text) > 16:
-        textList = text.split()
-        chunkList = []
-        currChunk = ""
+        text_list = text.split()
+        chunk_list = []
+        curr_chunk = ""
 
-        for word in textList:
-            if len(currChunk) + len(word) + 1 <= 16:
-                currChunk += word + " "
+        for word in text_list:
+            if len(curr_chunk) + len(word) + 1 <= 16:
+                curr_chunk += word + " "
             else:
-                chunkList.append(currChunk)
-                currChunk = word + " "
+                chunk_list.append(curr_chunk)
+                curr_chunk = word + " "
         
-        chunkList.append(currChunk)
+        chunk_list.append(curr_chunk)
     else:
-        chunkList = [text]
+        chunk_list = [text]
 
-    if chunkList[0] == "":
-        chunkList.pop(0)
+    if chunk_list[0] == "":
+        chunk_list.pop(0)
 
-    if len(chunkList[0]) > 16:
-        tempChunk = chunkList[1]
-        chunkList.pop(1)
+    if len(chunk_list[0]) > 16:
+        tempChunk = chunk_list[1]
+        chunk_list.pop(1)
 
         while len(tempChunk) > 16:
-            chunkList.append(tempChunk[:16])
+            chunk_list.append(tempChunk[:16])
             tempChunk = tempChunk[16:]
 
-        chunkList.append(tempChunk)
+        chunk_list.append(tempChunk)
     
-    print(chunkList)
+    print(chunk_list)
 
-    if len(chunkList) > 1:
-        for i in range(len(chunkList)):
-            mylcd.lcd_display_string(chunkList[i], 1)
+    if len(chunk_list) > 1:
+        for i in range(len(chunk_list)):
+            mylcd.lcd_display_string(chunk_list[i], 1)
 
-            if i != len(chunkList) - 1:
-                mylcd.lcd_display_string(chunkList[i + 1], 2)
+            if i != len(chunk_list) - 1:
+                mylcd.lcd_display_string(chunk_list[i + 1], 2)
             
-            if len(chunkList) == 2:
+            if len(chunk_list) == 2:
                 break
 
             while True:
