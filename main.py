@@ -10,6 +10,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT
 import openai
 import ADC0834
+import global_variables
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -171,7 +172,7 @@ async def display(ctx, *, text):
 
 
 @bot.command()
-async def displayjoystick(ctx):
+async def joystick(ctx):
     mylcd.lcd_clear()
     # send as embed
     embed = discord.Embed(
@@ -183,14 +184,27 @@ async def displayjoystick(ctx):
     while True:
         x_val = ADC0834.getResult(0)
         y_val = ADC0834.getResult(1)
+
         Btn_val = GPIO.input(BtnPin)
-        print("X: %d Y:%d Btn:%d" % (x_val, y_val, Btn_val))
-        mylcd.lcd_display_string("X: " + str(x_val), 1)
-        mylcd.lcd_display_string("Y: " + str(y_val), 2)
-        time.sleep(0.2)
-        if Btn_val == False:
-            mylcd.lcd_clear()
-            break
+
+        try:
+            # use the joystick to control the 2 servo motors
+            if x_val > 200:
+                global_variables.setAngle1(180)
+            elif x_val < 50:
+                global_variables.setAngle1(0)
+            else:
+                global_variables.setAngle1(90)
+
+            if y_val > 200:
+                global_variables.setAngle2(180)
+            elif y_val < 50:
+                global_variables.setAngle2(0)
+            else:
+                global_variables.setAngle2(90)
+        except KeyboardInterrupt:
+            global_variables.destroy()
+            return
 
 
 @bot.event
