@@ -1,55 +1,46 @@
 import customtkinter
 import subprocess
-from colorsys import rgb_to_hls
-from discord.ext import commands
-from discord.ext import tasks
-from discord.ext.commands import cooldown, BucketType
 import global_variables
-import RPi.GPIO as GPIO
 
 
-TEMPisMonitoring = False
+isDiscordOn = False
+process = None
+isJoystickOn = False
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("green")
-
-isDiscordOn = False
-
-process = None
-
-isJoystickOn = False
 
 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
-        # configure window
         self.title("Raspberry LCD + Temperature Sensor + Joystick + Button")
         self.geometry(f"{1100}x{580}")
 
-        # configure grid layout
-        # make a 2x2 grid
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # create sidebar frame with widgets
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
+
         self.logo_label = customtkinter.CTkLabel(
             self.sidebar_frame,
             text="MyProject",
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
+
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+
         self.sidebar_button_1 = customtkinter.CTkButton(
             self.sidebar_frame, command=self.activate_bot
         )
 
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
 
-        # temperature and humidity frame side by side with button to get temperature and humidity
         self.temperature_humidity_frame = customtkinter.CTkFrame(
             self, corner_radius=10
         )
@@ -65,7 +56,6 @@ class App(customtkinter.CTk):
         self.joystick_position_frame.grid(
             row=1, column=1, sticky="nsew", padx=20, pady=10
         )
-
 
         self.temperature_textbox = customtkinter.CTkLabel(
             self.temperature_humidity_frame,
@@ -119,10 +109,6 @@ class App(customtkinter.CTk):
 
         self.start_monitoring_button.grid(row=0, column=2, padx=20, pady=10)
 
-
-
-
-        # set default values
         self.sidebar_button_1.configure(text="Turn On Discord Bot")
         self.temperature_textbox.configure(text="Temperature: 0°C")
         self.humidity_textbox.configure(text="Humidity: 0%")
@@ -132,7 +118,9 @@ class App(customtkinter.CTk):
 
 
     def activate_bot(self):
+
         global isDiscordOn
+
         if not isDiscordOn:
             self.sidebar_button_1.configure(text="Turn Off Discord Bot")
             global process
@@ -142,58 +130,54 @@ class App(customtkinter.CTk):
             self.sidebar_button_1.configure(text="Turn On Discord Bot")
             process.kill()
             isDiscordOn = False
-
     
     def update_temperature(self, temperature):
+
         self.temperature_textbox.configure(text=f"Temperature: {temperature}°C")
 
     def update_humidity(self, humidity):
+
         self.humidity_textbox.configure(text=f"Humidity: {humidity}%")
     
     def get_values(self):
+
         self.loading_textbox.configure(text="Loading...")
         self.loading_textbox.update()
+
         temperature, humidity = global_variables.get_temperature_and_humidity()
+
         self.update_temperature(temperature)
         self.update_humidity(humidity)
+
         self.loading_textbox.configure(text=" ")
         self.loading_textbox.update()
 
     def start_monitoring(self):
-        global TEMPisMonitoring
-        TEMPisMonitoring = not TEMPisMonitoring
-        if TEMPisMonitoring:
+
+        global_variables.isMonitoring = not global_variables.isMonitoring
+
+        if global_variables.isMonitoring:
             self.start_monitoring_button.configure(text="Stop Monitoring")
             self.start_monitoring_button.update()
-            monitor_loop()
+            self.monitor_loop()
         else:
             self.start_monitoring_button.configure(text="Start Monitoring")
             self.start_monitoring_button.update()
 
-        def monitor_loop():
-        # Check if the button has been pressed again
-            if not TEMPisMonitoring:
-                self.start_monitoring_button.configure(text="Start Monitoring")
-                self.start_monitoring_button.update()
-                return
+    def monitor_loop(self):
 
-    
-    
-            joystick_x_val, joystick_y_val = global_variables.get_joystick_values()
-            self.display_joystick_x_textbox.configure(text=f"X: {joystick_x_val}")
-            self.display_joystick_y_textbox.configure(text=f"Y: {joystick_y_val}")
-            self.display_joystick_x_textbox.update()
-            self.display_joystick_y_textbox.update()
-            
-            # Schedule the next iteration of the loop
-            self.after(1, self.monitor_loop)
+        if not global_variables.isMonitoring:
+            self.start_monitoring_button.configure(text="Start Monitoring")
+            self.start_monitoring_button.update()
+            return
 
-    def stop_monitoring(self):
-        global TEMPisMonitoring
-        TEMPisMonitoring = False
-        self.start_monitoring_button.configure(text="Start Monitoring")
-        self.start_monitoring_button.update()
-    
+        joystick_x_val, joystick_y_val = global_variables.get_joystick_values()
+        self.display_joystick_x_textbox.configure(text=f"X: {joystick_x_val}")
+        self.display_joystick_y_textbox.configure(text=f"Y: {joystick_y_val}")
+        self.display_joystick_x_textbox.update()
+        self.display_joystick_y_textbox.update()
+        
+        self.after(1, self.monitor_loop)
 
 
 if __name__ == "__main__":
