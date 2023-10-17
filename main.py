@@ -11,6 +11,7 @@ import Adafruit_DHT
 import openai
 import ADC0834
 import global_variables
+import tkinter_gui
 
 button_pin = 22
 
@@ -180,10 +181,10 @@ async def display(ctx, *, text):
                 break
 
             while True:
-                input_state = GPIO.input(16)
+                input_state = GPIO.input(23)
 
                 if input_state == True:
-                    while GPIO.input(16) == True:
+                    while GPIO.input(23) == True:
                         pass
 
                     mylcd.lcd_clear()
@@ -200,6 +201,7 @@ async def joystick(ctx):
 
     mylcd.lcd_clear()
 
+    print("printing embed")
     embed = discord.Embed(
         title="Displaying Joystick Values",
         description="The following text has been displayed as scrolling text. Use green button to scroll through them.",
@@ -226,19 +228,23 @@ async def joystick(ctx):
             mylcd.lcd_clear()
         if len(str(y_val)) < len(str(prev_y_val)):
             mylcd.lcd_clear()
+
+
         
         mylcd.lcd_display_string(lcd_text, 1)
         mylcd.lcd_display_string(lcd_text2, 2)
 
+
         prev_x_val = x_val
         prev_y_val = y_val
 
-        global_variables.curr_x_val = x_val
-        global_variables.curr_y_val = y_val
+        # print("x_val: " + str(global_variables.curr_x_val) + ", y_val: " + str(global_variables.curr_y_val))
 
         if button_val == False:
             mylcd.lcd_clear()
             global_variables.destroy()
+
+            print("Button Pressed")
 
             return
         

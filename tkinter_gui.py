@@ -1,6 +1,9 @@
+import os
+import signal
 import customtkinter
 import subprocess
 import global_variables
+import ADC0834
 
 
 is_discord_on = False
@@ -124,8 +127,9 @@ class App(customtkinter.CTk):
             self.sidebar_button_1.configure(text="Turn Off Discord Bot")
 
             try:
+                #end process
                 process.kill()
-            except NameError:
+            except AttributeError:
                 pass
 
             process = subprocess.Popen(["python3", "main.py"])
@@ -135,8 +139,9 @@ class App(customtkinter.CTk):
             self.sidebar_button_1.configure(text="Turn On Discord Bot")
 
             try:
+                #end process
                 process.kill()
-            except NameError:
+            except AttributeError:
                 pass
 
             is_discord_on = False
@@ -169,10 +174,12 @@ class App(customtkinter.CTk):
         if global_variables.is_monitoring:
             self.start_monitoring_button.configure(text="Stop Monitoring")
             self.start_monitoring_button.update()
+            ADC0834.setup()
             self.monitor_loop()
         else:
             self.start_monitoring_button.configure(text="Start Monitoring")
             self.start_monitoring_button.update()
+            
 
     def monitor_loop(self):
 
@@ -180,10 +187,12 @@ class App(customtkinter.CTk):
             self.start_monitoring_button.configure(text="Start Monitoring")
             self.start_monitoring_button.update()
             return
+        
+        x_val = ADC0834.getResult(0)
+        y_val = ADC0834.getResult(1)
 
-        joystick_x_val, joystick_y_val = global_variables.get_joystick_values()
-        self.display_joystick_x_textbox.configure(text=f"X: {joystick_x_val}")
-        self.display_joystick_y_textbox.configure(text=f"Y: {joystick_y_val}")
+        self.display_joystick_x_textbox.configure(text=f"X: {x_val}")
+        self.display_joystick_y_textbox.configure(text=f"Y: {y_val}")
         self.display_joystick_x_textbox.update()
         self.display_joystick_y_textbox.update()
         
@@ -193,4 +202,3 @@ class App(customtkinter.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
- 

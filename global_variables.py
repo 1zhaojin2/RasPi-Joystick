@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import Adafruit_DHT
 import ADC0834
+import tkinter_gui
 
 
 GPIO.setmode(GPIO.BCM)
@@ -15,7 +16,7 @@ servo_pin_2 = 20
 curr_x_val = 0
 curr_y_val = 0
 
-isMonitoring = False
+is_monitoring = False
 
 
 def get_temperature_and_humidity():
@@ -49,12 +50,16 @@ def setup():
 
     ADC0834.setup()
 
+    is_monitoring = True
+
 def setAngleX(angle):
 
     angle = max(0, min(180, angle))
     pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
     pwm = map(pulse_width, 0, 20000, 0, 100)
     p.ChangeDutyCycle(pwm)
+    app = tkinter_gui.App()
+    app.display_joystick_x_textbox.configure(text=f"X: {angle}")
 
 def setAngleY(angle):
 
@@ -62,6 +67,8 @@ def setAngleY(angle):
     pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
     pwm = map(pulse_width, 0, 20000, 0, 100)
     p2.ChangeDutyCycle(pwm)
+    app = tkinter_gui.App()
+    app.display_joystick_y_textbox.configure(text=f"Y: {angle}")
 
 def loop():
 
@@ -77,7 +84,3 @@ def destroy():
     p.stop()
     p2.stop()
     is_monitoring = False
-
-def get_joystick_values():
-
-    return curr_x_val, curr_y_val
