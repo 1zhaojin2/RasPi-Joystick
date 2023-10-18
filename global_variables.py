@@ -50,34 +50,19 @@ def setup():
 
     ADC0834.setup()
 
-    is_monitoring = True
-
-def setAngleX(angle):
+def set_angle_x(angle):
 
     angle = max(0, min(180, angle))
     pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
     pwm = map(pulse_width, 0, 20000, 0, 100)
     p.ChangeDutyCycle(pwm)
-    app = tkinter_gui.App()
-    app.display_joystick_x_textbox.configure(text=f"X: {angle}")
 
-def setAngleY(angle):
+def set_angle_y(angle):
 
     angle = max(0, min(180, angle))
     pulse_width = map(angle, 0, 180, SERVO_MIN_PULSE, SERVO_MAX_PULSE)
     pwm = map(pulse_width, 0, 20000, 0, 100)
     p2.ChangeDutyCycle(pwm)
-    app = tkinter_gui.App()
-    app.display_joystick_y_textbox.configure(text=f"Y: {angle}")
-
-def loop():
-
-    while True:
-        x_val = ADC0834.getResult(0)
-        y_val = ADC0834.getResult(1)
-
-        setAngleX(x_val)
-        setAngleY(y_val)
 
 def destroy():
 

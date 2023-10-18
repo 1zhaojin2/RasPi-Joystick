@@ -4,6 +4,7 @@ import customtkinter
 import subprocess
 import global_variables
 import ADC0834
+import RPi_I2C_driver
 
 
 is_discord_on = False
@@ -12,6 +13,12 @@ process = None
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("green")
 
+prev_x_val_mapped = 0
+prev_y_val_mapped = 0
+
+mylcd = RPi_I2C_driver.lcd()
+
+custom_char = [0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f]
 
 class App(customtkinter.CTk):
     def __init__(self):
@@ -103,13 +110,13 @@ class App(customtkinter.CTk):
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
 
-        self.display_joystick_y_textbox.grid(row=0, column=1, padx=20, pady=10)
+        self.display_joystick_y_textbox.grid(row=1, column=0, padx=20, pady=10)
 
         self.start_monitoring_button = customtkinter.CTkButton(
             self.joystick_position_frame, command=self.start_monitoring
         )
 
-        self.start_monitoring_button.grid(row=0, column=2, padx=20, pady=10)
+        self.start_monitoring_button.grid(row=3, column=0, padx=20, pady=10)
 
         self.sidebar_button_1.configure(text="Turn On Discord Bot")
         self.temperature_textbox.configure(text="Temperature: 0°C")
@@ -169,19 +176,32 @@ class App(customtkinter.CTk):
 
     def start_monitoring(self):
 
+        global prev_x_val_mapped, prev_y_val_mapped
+
         global_variables.is_monitoring = not global_variables.is_monitoring
 
         if global_variables.is_monitoring:
             self.start_monitoring_button.configure(text="Stop Monitoring")
             self.start_monitoring_button.update()
             ADC0834.setup()
+            
+
             self.monitor_loop()
         else:
             self.start_monitoring_button.configure(text="Start Monitoring")
             self.start_monitoring_button.update()
+            self.display_joystick_x_textbox.configure(text="X: 0")
+            self.display_joystick_y_textbox.configure(text="Y: 0")
+            self.display_joystick_x_textbox.update()
+            self.display_joystick_y_textbox.update()
+            prev_x_val_mapped = 0
+            prev_y_val_mapped = 0
+            mylcd.lcd_clear()
             
 
     def monitor_loop(self):
+        
+        global prev_x_val_mapped, prev_y_val_mapped
 
         if not global_variables.is_monitoring:
             self.start_monitoring_button.configure(text="Start Monitoring")
@@ -191,10 +211,31 @@ class App(customtkinter.CTk):
         x_val = ADC0834.getResult(0)
         y_val = ADC0834.getResult(1)
 
+        # map x val and y val to a range between 0 and 15, then round it to integer
+        x_val_mapped = int(round((x_val / 255) * 16))
+        y_val_mapped = int(round((y_val / 255) * 16))
+
+        print(f"X: {x_val_mapped}, Y: {y_val_mapped}")
+
+        # display on lcd as blocks (0-15)
+
+        if x_val_mapped < prev_x_val_mapped or y_val_mapped < prev_y_val_mapped:
+            mylcd.lcd_clear()
+
+        for i in range(x_val_mapped):
+            mylcd.lcd_display_string_pos("*", 1, i)
+        
+        for i in range(y_val_mapped):
+            mylcd.lcd_display_string_pos("*", 2, i)
+
+
         self.display_joystick_x_textbox.configure(text=f"X: {x_val}")
         self.display_joystick_y_textbox.configure(text=f"Y: {y_val}")
         self.display_joystick_x_textbox.update()
         self.display_joystick_y_textbox.update()
+
+        prev_x_val_mapped = x_val_mapped
+        prev_y_val_mapped = y_val_mapped
         
         self.after(1, self.monitor_loop)
 

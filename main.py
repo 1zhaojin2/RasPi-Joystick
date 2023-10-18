@@ -218,11 +218,12 @@ async def joystick(ctx):
         y_val = ADC0834.getResult(1)
         button_val = GPIO.input(23)
 
-        global_variables.setAngleX(x_val)
-        global_variables.setAngleY(y_val)
-
         lcd_text = "X: " + str(x_val)
         lcd_text2 = "Y: " + str(y_val)
+
+        global_variables.set_angle_x(x_val)
+        global_variables.set_angle_y(y_val)
+
 
         if len(str(x_val)) < len(str(prev_x_val)):
             mylcd.lcd_clear()
