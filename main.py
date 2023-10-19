@@ -248,6 +248,41 @@ async def joystick(ctx):
             print("Button Pressed")
 
             return
+
+@bot.command()
+async def monith(ctx):
+    # monitors temperature and humidity indefinitly until the user presses the button
+
+    mylcd.lcd_clear()
+
+    print("printing embed")
+
+    embed = discord.Embed(
+        title="Displaying Temperature and Humidity",
+        description="Please press the button to stop monitoring",
+        color=0xEEE657,
+    )
+
+    await ctx.send(embed=embed)
+
+    while True:
+        humidity, temperature = Adafruit_DHT.read_retry(11, 4)
+
+        lcd_text = "Temp: " + str(temperature) + "C"
+        lcd_text2 = "Humidity: " + str(humidity) + "%"
+
+        mylcd.lcd_display_string(lcd_text, 1)
+        mylcd.lcd_display_string(lcd_text2, 2)
+
+        button_val = GPIO.input(23)
+
+        if button_val == False:
+            mylcd.lcd_clear()
+
+            print("Button Pressed")
+
+            return
+
         
 
 @bot.event

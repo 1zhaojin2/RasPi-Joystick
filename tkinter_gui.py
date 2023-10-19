@@ -11,7 +11,7 @@ is_discord_on = False
 process = None
 
 customtkinter.set_appearance_mode("dark")
-customtkinter.set_default_color_theme("green")
+customtkinter.set_default_color_theme("blue")
 
 prev_x_val_mapped = 0
 prev_y_val_mapped = 0
