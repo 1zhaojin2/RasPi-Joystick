@@ -1,8 +1,5 @@
-from colorsys import rgb_to_hls
 import discord
 from discord.ext import commands
-from discord.ext import tasks
-from discord.ext.commands import cooldown, BucketType
 import time
 import lirc
 import RPi_I2C_driver
@@ -11,7 +8,6 @@ import Adafruit_DHT
 import openai
 import ADC0834
 import global_variables
-import tkinter_gui
 
 button_pin = 22
 
@@ -66,6 +62,9 @@ async def help(ctx):
     embed.add_field(
         name="-joystick", value="Displays the values of the joystick", inline=False
     )
+    embed.add_field(
+        name="-monith", value="Displays the temperature and humidity continuously", inline=False
+    )
 
     await ctx.send(embed=embed)
 
@@ -76,12 +75,14 @@ async def storekey(ctx, *, key):
     user_api_keys[ctx.message.author.id] = key
     await ctx.message.delete()
 
+
     embed = discord.Embed(
         title="API Key Stored",
         description="Your API key has been stored",
         color=0xEEE657,
     )
 
+    
     embed.add_field(name="Key", value=key, inline=False)
 
 
@@ -204,7 +205,7 @@ async def joystick(ctx):
     print("printing embed")
     embed = discord.Embed(
         title="Displaying Joystick Values",
-        description="The following text has been displayed as scrolling text. Use green button to scroll through them.",
+        description="Please press the button to stop monitoring",
         color=0xEEE657,
     )
     await ctx.send(embed=embed)
@@ -366,4 +367,4 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-bot.run("MTA4MzQ0OTY4MjU5Mzg0OTM0NA.GZ8h9M.Sa6gSp79c8FTyssXiwMv_ipn_Cwh5kHBod2Rpo")
+bot.run("[Enter your bot token here]")

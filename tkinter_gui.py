@@ -1,5 +1,3 @@
-import os
-import signal
 import customtkinter
 import subprocess
 import global_variables

@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO
 import Adafruit_DHT
 import ADC0834
-import tkinter_gui
 
 
 GPIO.setmode(GPIO.BCM)
