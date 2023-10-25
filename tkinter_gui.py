@@ -1,33 +1,54 @@
+"""
+Name: Jinyuan Zhao
+Date: 2023-10-24
+Program Title: tkinter_gui.py
+Description: This is a GUI program that displays the temperature and humidity of the room, and the position of the joystick.
+"""
+
 import customtkinter
 import subprocess
 import global_variables
 import ADC0834
 import RPi_I2C_driver
 
-
+# global variables
 is_discord_on = False
 process = None
 
+# set appearance mode and default color theme
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("blue")
 
+# global variables for joystick
 prev_x_val_mapped = 0
 prev_y_val_mapped = 0
 
+# lcd
 mylcd = RPi_I2C_driver.lcd()
 
+# custom character for lcd (unused)
 custom_char = [0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f]
 
+"""
+This class is the main application.
+"""
 class App(customtkinter.CTk):
+
+    """
+    This method is the constructor.
+    """
     def __init__(self):
+        # call the constructor of the parent class
         super().__init__()
 
+        # set the title and size of the window
         self.title("Raspberry LCD + Temperature Sensor + Joystick + Button")
         self.geometry(f"{1100}x{580}")
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
+        # create the widgets
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
 
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
@@ -123,7 +144,9 @@ class App(customtkinter.CTk):
         self.loading_textbox.configure(text=" ")
         self.start_monitoring_button.configure(text="Start Monitoring")
 
-
+    """
+    This method is used to activate the discord bot.
+    """
     def activate_bot(self):
 
         global is_discord_on, process
@@ -151,14 +174,23 @@ class App(customtkinter.CTk):
 
             is_discord_on = False
     
+    """
+    This method is used to update the temperature.
+    """
     def update_temperature(self, temperature):
 
         self.temperature_textbox.configure(text=f"Temperature: {temperature}°C")
 
+    """
+    This method is used to update the humidity.
+    """
     def update_humidity(self, humidity):
 
         self.humidity_textbox.configure(text=f"Humidity: {humidity}%")
     
+    """
+    This method is used to get the temperature and humidity.
+    """
     def get_values(self):
 
         self.loading_textbox.configure(text="Loading...")
@@ -172,6 +204,9 @@ class App(customtkinter.CTk):
         self.loading_textbox.configure(text=" ")
         self.loading_textbox.update()
 
+    """
+    This method is used to start monitoring the joystick.
+    """
     def start_monitoring(self):
 
         global prev_x_val_mapped, prev_y_val_mapped
@@ -196,7 +231,9 @@ class App(customtkinter.CTk):
             prev_y_val_mapped = 0
             mylcd.lcd_clear()
             
-
+    """
+    This method is used to monitor the joystick.
+    """
     def monitor_loop(self):
         
         global prev_x_val_mapped, prev_y_val_mapped
@@ -237,7 +274,7 @@ class App(customtkinter.CTk):
         
         self.after(1, self.monitor_loop)
 
-
+# main function
 if __name__ == "__main__":
     app = App()
     app.mainloop()
